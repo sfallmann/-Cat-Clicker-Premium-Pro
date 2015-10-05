@@ -1,0 +1,35 @@
+.pic:hover {
+    cursor: pointer;
+
+}
+
+#cat-list {
+    font-weight: bold;
+    list-style: none;
+    text-align: center;
+
+}
+
+#cat-list li:hover {
+    cursor: pointer;
+    background-color: black;
+    color: white;
+}
+
+.content{
+    margin-top  : 50px;
+}
+
+.menu-title {
+    color: white;
+    background-color: grey;
+}
+
+.bigger {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+input {
+    max-width: 300px;
+}
