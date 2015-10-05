@@ -36,7 +36,7 @@
         // set the model to the passed in cat
         this.model = model;
         // set a property 'el' to allow manipulation in the DOM
-        this.el;
+        this.el = $("<li/>", { "class": "list-group-item" });
 
     }
 
@@ -44,10 +44,14 @@
 
         // create the list element to render
         render: function () {
-            this.el = $("<li/>", { "html": this.model.name, "class": "list-group-item" });
 
+
+            this.el.text(this.model.name);
             $("#cat-list").append(this.el);
         },
+        update: function(){
+            this.el.text(this.model.name);
+        }
     }
 
     var DetailView = function(model){
@@ -55,7 +59,18 @@
         // set the model to the passed in cat
         this.model = model;
         // set a property 'el' to allow manipulation in the DOM
-        this.el;
+        this.el = $("<div/>", { "class": "panel panel-default" })
+            .append($("<div/>", {
+
+                "class": "bigger -name panel panel-heading"
+            }))
+                .append($("<img/>", {
+                "src": this.model.image,
+                "class": "img-responsive panel panel-body pic -clicker"
+            }))
+                .append($("<div />", {
+                "class": "bigger panel-footer -counter"
+            }));
 
     }
 
@@ -64,23 +79,18 @@
         // create the list element to render
         render: function () {
 
-            this.el = $("<div/>", { "class": "panel panel-default" })
-                    .append($("<div/>", {
-                        "html": "Name: " + this.model.name,
-                        "class": "bigger panel panel-heading"
-                    }))
-                    .append($("<img/>", {
-                        "src": this.model.image,
-                        "class": "img-responsive panel panel-body pic -clicker"
-                    }))
-                    .append($("<div />", {
-                        "html": "Click Count: " + this.model.count,
-                        "class": "bigger panel-footer -counter"
-                    }));
+            this.el.find(".-name").text(this.model.name);
+            this.el.find(".-clicker").attr("src", this.model.image);
+            this.el.find(".-counter").text("Click Count: " + this.model.count);
 
             // unbind all the event handlers within #cat-display, empty it, and then add 'el' to it
-            $("#cat-display").children().unbind();
+
             $("#cat-display").html(this.el);
+        },
+        update: function() {
+            this.el.find(".-name").text(this.model.name);
+            this.el.find(".-clicker").attr("src", this.model.image);
+            this.el.find(".-counter").text("Click Count: " + this.model.count);
         }
 
     }
@@ -209,7 +219,8 @@
                 listView.render();
 
                 // set the selection listener for this cat.
-                self.setSelectListener(listView,detailView,model);
+                self.setSelectListener(listView,detailView);
+
 
             }
 
@@ -255,45 +266,49 @@
             }
         },
         // set the click listener for the ListView 'el' property
-        setSelectListener: function(listView,detailView,model){
+        setSelectListener: function(listView,detailView){
 
             var self = this;
 
 
             listView.el.on("click", function(){
                 // render the detailView
+
                 detailView.render();
+                self.setClickListener(detailView);
                 // set selected since the selected cat change
-                self.setSelected(listView,detailView,model);
+                self.setSelected(listView,detailView,detailView.model);
                 // update the admin panel values
                 self.updateAdminInputs();
                 // set the click listener for the newly rendered DetailView
-                self.setClickListener();
+                //self.setClickListener();
 
             });
         },
 
         // set the listener for clicking the cat image
-        setClickListener: function(){
+        setClickListener: function(detailView){
+
             var self = this;
-            // set selected to s for easy reference
-            var s = self.selected;
+            // set detailView.model to model for easy reference
+            var model = detailView.model;
 
             // get the clicker element -- the cat image -- in the DetailView
-            var clicker = $(s.detailView.el).find(".-clicker");
+            var clicker = $(detailView.el).find(".-clicker");
 
             // get the counter element in the DetailView
-            var counter = $(s.detailView.el).find(".-counter");
+            var counter = $(detailView.el).find(".-counter");
 
             // when the image is clicked
             $(clicker).on("click",function(){
-
                     // update the count of selected cat's model
-                    s.model.count++;
+                    console.log("Clicking " + model.name);
+                    model.count++;
+                    console.log("Count " + model.count);
                     // update the admin panel values
                     self.updateAdminInputs();
                     // update the counter in DetailView
-                    $(counter).text("Click Count: " + s.model.count);
+                    detailView.update();
 
             });
         },
@@ -326,11 +341,11 @@
             s.model.count = $("#-click-input").val();
 
             // render the DetailView of selected
-            s.detailView.render();
+            s.detailView.update();
             // change the value of the list item for the selected cat
-            s.listView.el.text(s.model.name);
+            s.listView.update();
             // set the click event listener for the newly rendered DetailView
-            this.setClickListener();
+            //this.setClickListener();
             // invoke cancelEdit() to get rid of the admin panel
             this.cancelEdit();
 
